@@ -34,6 +34,7 @@ Você pode escolher uma das opções abaixo:
 🔹 Opção A: Instalação direta
 ```bash
 pip install streamlit pandas plotly
+
 🔹 Opção B: Usando requirements.txt (Recomendado)
 ```bash
 pip install -r requirements.txt
