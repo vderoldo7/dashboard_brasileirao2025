@@ -80,6 +80,7 @@ Projeto desenvolvido com foco em:
 Estudo de análise de dados
 Visualização interativa
 Aplicações com Streamlit
+
 👨‍💻 Autor
 
 Vitor Viana Carneiro Deroldo
