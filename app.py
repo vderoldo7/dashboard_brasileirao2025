@@ -33,12 +33,18 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("📋 Tabela Resumida")
-    # Mostra um dataframe interativo
-    st.dataframe(
+    
+  
+    event = st.dataframe(
         df_filtrado[["Time", "Vitórias", "Derrotas", "Empates", "Recompensa"]], 
         use_container_width=True, 
-        hide_index=True
+        hide_index=True,
+        on_select="rerun",         # <--- Isso faz o código rodar de novo ao clicar
+        selection_mode="single-row" # <--- Permite selecionar apenas um time
     )
+
+  
+    selecao = event.selection.rows
 
 with col2:
     st.subheader("🎯 Eficiência: Gols Marcados x Sofridos")
@@ -65,3 +71,28 @@ fig_barras = px.bar(
 )
 fig_barras.update_traces(textposition='outside')
 st.plotly_chart(fig_barras, use_container_width=True)
+
+# 1. A nova função (Substitua a antiga por esta)
+@st.dialog("📊 Detalhes do Time")
+def mostrar_detalhes(nome_time):
+    dados_time = df[df["Time"] == nome_time].iloc[0]
+    
+    st.write(f"### 🏟️ {nome_time}")
+    st.subheader(f"⭐ Artilheiro: {dados_time['Artilheiro na Competição']}")
+    
+    st.divider()
+    
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Vitórias", dados_time["Vitórias"])
+    c2.metric("Gols Marcados", dados_time["Gols Marcados"])
+    c3.metric("Gols Sofridos", dados_time["Gols Sofridos"])
+    
+    saldo = dados_time["Gols Marcados"] - dados_time["Gols Sofridos"]
+    st.metric("Saldo de Gols", saldo, delta=int(saldo))
+
+    st.info(f"Situação na Tabela: **{dados_time['Recompensa']}**")
+
+# 2. O gatilho que chama a função (Mantenha isso logo abaixo da função)
+if selecao:
+    nome_do_time = df_filtrado.iloc[selecao[0]]["Time"]
+    mostrar_detalhes(nome_do_time)
