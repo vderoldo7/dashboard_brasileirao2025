@@ -38,6 +38,7 @@ pip install streamlit pandas plotly
 🔹 Opção B: Usando requirements.txt (Recomendado)
 ```bash
 pip install -r requirements.txt
+```
 
 ▶️ Executar a Aplicação
 
