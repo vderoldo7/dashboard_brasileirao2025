@@ -1,81 +1,30 @@
-import os
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go # Para a linha de referência no gráfico
 
 # 1. Configuração inicial da página
 st.set_page_config(page_title="Dashboard Brasileirão 2025", page_icon="⚽", layout="wide")
 st.title("⚽ Dashboard Brasileirão 2025")
 st.markdown("Análise interativa do desempenho dos times na última temporada.")
 
-# 2. Carregamento dos dados com cache para otimizar a performance
+# 2. Carregamento dos dados
 @st.cache_data
 def load_data():
-    # Lê o CSV usando o separador ponto e vírgula, conforme criamos anteriormente
-    df = pd.read_csv("brasileirao_2025.csv", sep=";")
-    return df
+    try:
+        # Tenta ler o arquivo, evitando que a tela quebre se o CSV não estiver na pasta
+        return pd.read_csv("brasileirao_2025.csv", sep=";")
+    except FileNotFoundError:
+        st.error("⚠️ Arquivo 'brasileirao_2025.csv' não encontrado. Verifique o caminho.")
+        return pd.DataFrame()
 
 df = load_data()
 
-# 3. Barra lateral para filtros interativos
-st.sidebar.header("Filtros de Análise")
-recompensa_selecionada = st.sidebar.multiselect(
-    "Filtre por zona de classificação:",
-    options=df["Recompensa"].unique(),
-    default=df["Recompensa"].unique()
-)
-
-# Aplica o filtro no dataframe
-df_filtrado = df[df["Recompensa"].isin(recompensa_selecionada)]
-
-# 4. Layout principal: Dividindo em colunas
-col1, col2 = st.columns(2)
-
-with col1:
-    st.subheader("📋 Tabela Resumida")
-    
-  
-    event = st.dataframe(
-        df_filtrado[["Time", "Vitórias", "Derrotas", "Empates", "Recompensa"]], 
-        use_container_width=True, 
-        hide_index=True,
-        on_select="rerun",         # <--- Isso faz o código rodar de novo ao clicar
-        selection_mode="single-row" # <--- Permite selecionar apenas um time
-    )
-
-  
-    selecao = event.selection.rows
-
-with col2:
-    st.subheader("🎯 Eficiência: Gols Marcados x Sofridos")
-    # Gráfico de dispersão para ver quem ataca bem e defende bem
-    fig_scatter = px.scatter(
-        df_filtrado, 
-        x="Gols Marcados", 
-        y="Gols Sofridos", 
-        color="Recompensa", 
-        hover_name="Time",
-        template="plotly_dark" # Tema escuro para combinar com o dashboard
-    )
-    st.plotly_chart(fig_scatter, use_container_width=True)
-
-# 5. Gráfico de barras na largura total
-st.subheader("🏆 Total de Vitórias por Time")
-fig_barras = px.bar(
-    df_filtrado.sort_values(by="Vitórias", ascending=False),
-    x="Time",
-    y="Vitórias",
-    color="Recompensa",
-    text="Vitórias",
-    template="plotly_dark"
-)
-fig_barras.update_traces(textposition='outside')
-st.plotly_chart(fig_barras, use_container_width=True)
-
-# 1. A nova função (Substitua a antiga por esta)
+# 3. Funções do App (Definidas no topo para melhor organização)
 @st.dialog("📊 Detalhes do Time")
-def mostrar_detalhes(nome_time):
-    dados_time = df[df["Time"] == nome_time].iloc[0]
+def mostrar_detalhes(nome_time, dataframe):
+    # Busca os dados do time selecionado
+    dados_time = dataframe[dataframe["Time"] == nome_time].iloc[0]
     
     st.write(f"### 🏟️ {nome_time}")
     st.subheader(f"⭐ Artilheiro: {dados_time['Artilheiro na Competição']}")
@@ -92,7 +41,77 @@ def mostrar_detalhes(nome_time):
 
     st.info(f"Situação na Tabela: **{dados_time['Recompensa']}**")
 
-# 2. O gatilho que chama a função (Mantenha isso logo abaixo da função)
+# Para a execução se o DataFrame estiver vazio (caso o CSV não tenha carregado)
+if df.empty:
+    st.stop()
+
+# 4. Barra lateral para filtros interativos
+st.sidebar.header("Filtros de Análise")
+recompensa_selecionada = st.sidebar.multiselect(
+    "Filtre por zona de classificação:",
+    options=df["Recompensa"].unique(),
+    default=df["Recompensa"].unique()
+)
+
+# Trava de segurança: Se o usuário tirar todos os filtros, avisa e para a execução abaixo
+if not recompensa_selecionada:
+    st.warning("⚠️ Selecione pelo menos uma zona de classificação na barra lateral para visualizar os dados.")
+    st.stop()
+
+# Aplica o filtro no dataframe
+df_filtrado = df[df["Recompensa"].isin(recompensa_selecionada)]
+
+# 5. Layout principal: Dividindo em colunas
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("📋 Tabela Resumida")
+    
+    event = st.dataframe(
+        df_filtrado[["Time", "Vitórias", "Derrotas", "Empates", "Recompensa"]], 
+        use_container_width=True, 
+        hide_index=True,
+        on_select="rerun",         # Atualiza ao clicar
+        selection_mode="single-row" # Apenas um time por vez
+    )
+    
+    selecao = event.selection.rows
+
+with col2:
+    st.subheader("🎯 Eficiência: Gols Marcados x Sofridos")
+    
+    fig_scatter = px.scatter(
+        df_filtrado, 
+        x="Gols Marcados", 
+        y="Gols Sofridos", 
+        color="Recompensa", 
+        hover_name="Time",
+        template="plotly_dark"
+    )
+    
+    # Bônus: Linha diagonal indicando Saldo de Gols = 0
+    max_gols = max(df_filtrado["Gols Marcados"].max(), df_filtrado["Gols Sofridos"].max())
+    fig_scatter.add_shape(
+        type="line", line=dict(dash='dash', color="gray", width=1),
+        x0=0, y0=0, x1=max_gols, y1=max_gols
+    )
+    
+    st.plotly_chart(fig_scatter, use_container_width=True)
+
+# 6. Gráfico de barras na largura total
+st.subheader("🏆 Total de Vitórias por Time")
+fig_barras = px.bar(
+    df_filtrado.sort_values(by="Vitórias", ascending=False),
+    x="Time",
+    y="Vitórias",
+    color="Recompensa",
+    text="Vitórias",
+    template="plotly_dark"
+)
+fig_barras.update_traces(textposition='outside')
+st.plotly_chart(fig_barras, use_container_width=True)
+
+# 7. Gatilho para abrir o modal de detalhes
 if selecao:
     nome_do_time = df_filtrado.iloc[selecao[0]]["Time"]
-    mostrar_detalhes(nome_do_time)
+    mostrar_detalhes(nome_do_time, df_filtrado)
