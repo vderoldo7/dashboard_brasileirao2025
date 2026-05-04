@@ -4,8 +4,15 @@ import plotly.express as px
 import plotly.graph_objects as go # Para a linha de referência no gráfico
 
 # 1. Configuração inicial da página
-st.set_page_config(page_title="Dashboard Brasileirão 2025", page_icon="⚽", layout="wide")
-st.title("⚽ Dashboard Brasileirão 2025")
+st.set_page_config(page_title="Dashboard Brasileirão 2025", page_icon="img/download.png", layout="wide")
+
+col1, col2 = st.columns([1, 6])
+
+with col1:
+    st.image("img/download.png", width=80)
+
+with col2:
+    st.title("Dashboard Brasileirão 2025")
 st.markdown("Análise interativa do desempenho dos times na última temporada.")
 
 # 2. Carregamento dos dados
