@@ -1,5 +1,9 @@
 # ⚽ Dashboard Brasileirão 2025 📊
 
+# Link do projeto hospedado:
+
+ https://dashboardbrasileirao2025-vitor-deroldo.streamlit.app/
+
 ## 📝 Sobre o Projeto
 Este projeto é um *Dashboard Interativo* desenvolvido para centralizar e visualizar as estatísticas do Campeonato Brasileiro de 2025.
 
@@ -78,6 +82,13 @@ Projeto desenvolvido com foco em:
 Estudo de análise de dados
 Visualização interativa
 Aplicações com Streamlit
+
+# Detalhes
+
+  O projeto contém dois tipos de gráficos que podem ser utilizados para análises, e também possui a tabela do campeonato com dados reais.
+  Caso o usuário deseje saber sobre um dado de um time específico, basta clicar no time que no próprio projeto irá abrir uma aba contendo os dados unicamente do time.
+  O usuário também pode filtrar no campo esquerdo do dashboard as recompensas de cada time no campeonato (Libertadores, Sulamericana, Neutro e Rebaixamento).
+
 
 👨‍💻 Autor
 
