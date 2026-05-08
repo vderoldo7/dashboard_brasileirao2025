@@ -52,9 +52,7 @@ py -m streamlit run app.py
 
 🌐 Acessar no Navegador
 
-O Streamlit abrirá automaticamente. Caso não abra, acesse:
-
-http://localhost:8501
+O Streamlit abrirá automaticamente.
 
 📁 Estrutura do Projeto
 ├── data/               # Arquivos de dados (ex: brasileirao_2025.csv)
