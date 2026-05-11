@@ -1,7 +1,8 @@
+#Esse projeto foi feito apenas para estudo, visando melhorar meu conhecimento em análise de dados com Python
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go # Para a linha de referência no gráfico
+import plotly.graph_objects as go 
 
 # 1. Configuração inicial da página
 st.set_page_config(page_title="Dashboard Brasileirão 2025", page_icon="img/download.png", layout="wide")
@@ -15,7 +16,7 @@ with col2:
     st.title("Dashboard Brasileirão 2025")
 st.markdown("Análise interativa do desempenho dos times na última temporada.")
 
-# 2. Carregamento dos dados
+# 2. Carregamento dos dados => @s.cache_data ajuda a carregar os dados apenas uma vez, deixando o código mais leve
 @st.cache_data
 def load_data():
     try:
